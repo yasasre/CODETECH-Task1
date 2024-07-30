@@ -1,0 +1,167 @@
+/*Exploratory Data Analysis on IPL dataset*/
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt #for visualization
+import seaborn as sns #for visualization
+df= pd.read_csv("C:/Users/Sanjay/Downloads/archive (8)/matches.csv")
+delv=pd.read_csv("C:/Users/Sanjay/Downloads/archive (8)/deliveries.csv")
+print(df.head)
+data=df.describe()
+print(data)
+print(df.dtypes)
+print(df.columns)
+print(df.duplicated().sum())
+print(df.info)
+print(df.isnull().sum())
+print(df.shape)
+#No of matches played
+print('matches played',df.shape[0])
+#Cities ipl was played
+print('\n cities played',df['city'].unique())
+#Temas that participated in ipl
+print('teams participated',df['team2'].unique())
+#shows the year
+df['Year']=pd.DatetimeIndex(df['date']).year
+print(df.head())
+#adding new column
+matches_per_season=df.groupby(['season'])['id'].count().reset_index().rename(columns={'id':'matches'})
+print(matches_per_season)
+(sns.countplot(df['season']))
+plt.xticks(rotation=45,fontsize=10)
+plt.yticks(fontsize=10)
+plt.xlabel('season',fontsize= 10)
+plt.ylabel('çount', fontsize= 10)
+plt.title('matches played in season',fontsize= 10, fontweight='bold')
+plt.show()
+#displays the no of wins by season every year
+Season = df.groupby(['season'])['win_by_runs'].sum().reset_index()
+p = Season.set_index('season')
+ax = plt.axes()
+ax.set(facecolor='grey')
+sns.lineplot(data=p,palette='magma')
+plt.title('total no of runs',fontsize=12,fontweight="bold")
+plt.show()
+print(df['player_of_match'])
+Pom = df.groupby(['player_of_match'])['win_by_runs'].sum().reset_index()
+y = Pom.set_index('player_of_match')
+ax = plt.axes()
+ax.set(facecolor='pink')
+sns.lineplot(data=y,palette='viridis')
+plt.title('total no of runs',fontsize=12,fontweight="bold")
+plt.show()
+print(Pom.head())
+# Filter rows where 'Player_of_the_Match' column matches the specific player
+player_name = 'MS Dhoni'
+player_of_match_df = df[df['player_of_match'] == player_name]
+print(player_of_match_df)
+print(player_of_match_df.columns)
+plt.figure(figsize=(12, 6))
+sns.lineplot(data=player_of_match_df, x='season', y='team1', marker='o', palette='viridis')
+plt.xlabel('season of the match')
+plt.ylabel('Team')
+plt.title(f'Performance of {player_name} Over Time')
+plt.xticks(rotation=45)
+plt.show()
+#to display no of tosses won by various teams
+toss=df['toss_winner'].value_counts()
+ax=plt.axes()
+ax.set(facecolor='grey')
+sns.set(rc={'figure.figsize':(15,10)},style='darkgrid')
+ax.set_title('num of tosses won by team',fontsize=15,fontweight='bold')
+sns.barplot(y=toss.index,x=toss,orient='h',palette='magma',saturation=1)
+plt.xlabel('tosses won')
+plt.ylabel('Team')
+plt.show()
+#displays the toss decisions took
+ax = plt.axes()
+ax.set(facecolor='pink')
+sns.countplot(x='season',hue='toss_decision',data=df,palette='magma',saturation=1)
+plt.xticks(rotation=90,fontsize=10)
+plt.yticks(fontsize=15)
+plt.xlabel('\n season',fontsize=15)
+plt.ylabel('count',fontsize=15)
+plt.title('toss decision across the season',fontsize=12,fontweight='bold')
+plt.show()
+#to display the total wins by the teams for whole season
+print(df['result'].value_counts())
+#display the best stadiums to win
+print(df.venue[df.result!='runs'].mode())
+print(df.venue[df.result!='wickets'].mode())
+#to display the best ground to win by particular team
+print(df.venue[df.toss_winner=='Chennai Super Kings'][df.winner=='Chennai Super Kings'].mode())
+#to print the team that are good at defending
+print(df.winner[df.result!='runs'].mode())
+#to print the team that has highest winning rate compared to other teams
+print(df.winner[df.result!='wickets'].mode())
+#to find wheather toss won team will be the winner or not
+Toss=df['toss_winner'] == df['winner']
+plt.figure(figsize=(12,4))
+sns.countplot(df.toss_decision[df.toss_winner==df.winner])
+plt.show()
+#represents the rate of winning and lossing of the team who has won the toss
+print(Toss)
+#deliveries
+print(delv.head)
+print(delv.dtypes)
+print(delv.columns)
+print(delv.duplicated().sum())
+print(delv.info)
+print(delv.isnull().sum())
+print(delv.shape)
+print(delv['batsman'])
+player = (delv['batsman']=='SK Raina')
+print('SKR ipl record')
+df_raina=delv[player]
+print(df_raina.head())
+df_raina['player_dismissed'].value_counts().plot.pie(autopct='%1.1f%%',shadow=True,rotatelabels=True)
+plt.title('dismissal',fontweight='bold',fontsize=15)
+plt.show()
+#to display the overall runs took by SK rain in ipl
+def count(df_raina,runs):
+    return len(df_raina[df_raina['batsman_runs']==runs])*runs
+print('runs in 1s:',count(df_raina,1))
+print('runs in 2s:',count(df_raina,2))
+print('runs in 3s:',count(df_raina,3))
+print('runs in 4s:',count(df_raina,4))
+print('runs in 6s:',count(df_raina,6))
+#to display the overall runs took by MSD in IPL
+print('MSD ipl record')
+player = (delv['batsman']=='MS Dhoni')
+df_Dhoni=delv[player]
+print(df_Dhoni.head())
+df_Dhoni['player_dismissed'].value_counts().plot.pie(autopct='%1.1f%%',shadow=True,rotatelabels=True)
+plt.title('dismissal',fontweight='bold',fontsize=15)
+plt.show()
+def count(df_Dhoni,runs):
+    return len(df_Dhoni[df_Dhoni['batsman_runs']==runs])*runs
+print('runs in 1s:',count(df_Dhoni,1))
+print('runs in 2s:',count(df_Dhoni,2))
+print('runs in 3s:',count(df_Dhoni,3))
+print('runs in 4s:',count(df_Dhoni,4))
+print('runs in 6s:',count(df_Dhoni,6))
+runs=delv.groupby(['batsman'])['batsman_runs'].sum().reset_index()
+runs.columns =['batsman','runs']
+y = runs.sort_values(by='runs',ascending=False).head(10).reset_index().drop('index', axis=1)
+print(y)
+#to display the top 10 best runs in ipl
+ax =plt.axes()
+ax.set(facecolor ='grey')
+sns.barplot(x=y['batsman'],y=y['runs'],palette='rocket',saturation=1)
+plt.xticks(rotation=90,fontsize=10)
+plt.yticks(fontsize=10)
+plt.xlabel('\nplayer',fontsize=15)
+plt.ylabel('tot runs',fontsize=15)
+plt.title('top 10 best runs in ipl',fontsize=15,fontweight='bold')
+plt.show()
+ax =plt.axes()
+ax.set(facecolor='black')
+df.player_of_match.value_counts()[:10].plot(kind='hist')
+plt.xlabel('players')
+plt.ylabel('count')
+plt.title('highest MOM award winners',fontsize=15,fontweight='bold')
+plt.show()
+
+
+
+
+
